@@ -16,12 +16,11 @@ class UsersRepository {
     } catch (err) {
       fs.writeFileSync(this.filename, '[]');
     }
-    
   }
 
   async getAll() {
     return JSON.parse(
-      await fs.promises.readFile(this.filename, { 
+      await fs.promises.readFile(this.filename, {
         encoding: 'utf8'
       })
     );
@@ -31,9 +30,8 @@ class UsersRepository {
     attrs.id = this.randomId();
 
     const salt = crypto.randomBytes(8).toString('hex');
-    const buf = await scrypt(attrs.password, salt, 64,);
+    const buf = await scrypt(attrs.password, salt, 64);
 
-    
     const records = await this.getAll();
     const record = {
       ...attrs,
@@ -41,15 +39,14 @@ class UsersRepository {
     };
     records.push(record);
 
-    //write the updated 'records' array back to this.filename
     await this.writeAll(records);
 
     return record;
   }
 
   async comparePasswords(saved, supplied) {
-    //saved -> password saved in our database. 'hashed.salt'
-    //supplied -> password given to us by a user trying to sign in
+    // Saved -> password saved in our database. 'hashed.salt'
+    // Supplied -> password given to us by a user trying sign in
     const [hashed, salt] = saved.split('.');
     const hashedSuppliedBuf = await scrypt(supplied, salt, 64);
 
@@ -57,7 +54,10 @@ class UsersRepository {
   }
 
   async writeAll(records) {
-    await fs.promises.writeFile(this.filename, JSON.stringify(records, null, 2));
+    await fs.promises.writeFile(
+      this.filename,
+      JSON.stringify(records, null, 2)
+    );
   }
 
   randomId() {
@@ -82,10 +82,8 @@ class UsersRepository {
     if (!record) {
       throw new Error(`Record with id ${id} not found`);
     }
-    //record === { email: 'test@test.com }
-    // attrs === {password: 'mypassword' }
+
     Object.assign(record, attrs);
-    //assigns all attrs and adds on to record
     await this.writeAll(records);
   }
 
